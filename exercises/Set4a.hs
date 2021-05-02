@@ -122,7 +122,7 @@ longest a =minimumBy (\x y ->compare (head x) (head y)) [x | x <- a,length x == 
 
 incrementKey :: (Eq k,Num v) => k -> [(k,v)] -> [(k,v)]
 incrementKey key [] = []
-incrementKey key ((k,v):xs) = if key == k then (k,v+1) : incrementKey key xs else (k,v) : incrementKey key xs   
+incrementKey key ((k,v):xs) = if key == k then (k,v+1) : incrementKey key xs else (k,v) : incrementKey key xs
 
 ------------------------------------------------------------------------------
 -- Ex 7: compute the average of a list of values of the Fractional
@@ -156,7 +156,9 @@ average xs =  sum xs / fromIntegral (length xs)
 --     ==> "Lisa"
 
 winner :: Map.Map String Int -> String -> String -> String
-winner scores player1 player2 = todo
+winner scores player1 player2 = let  p1 = Map.findWithDefault 0 player1 scores
+                                     p2 = Map.findWithDefault 0 player2 scores
+                                in if p1 >= p2 then player1 else player2
 
 ------------------------------------------------------------------------------
 -- Ex 9: compute how many times each value in the list occurs. Return
@@ -171,7 +173,8 @@ winner scores player1 player2 = todo
 --     ==> Map.fromList [(False,3),(True,1)]
 
 freqs :: (Eq a, Ord a) => [a] -> Map.Map a Int
-freqs xs = todo
+freqs = foldr (Map.alter f) Map.empty where f Nothing = Just 1
+                                            f (Just a) = Just (a+1)
 
 ------------------------------------------------------------------------------
 -- Ex 10: recall the withdraw example from the course material. Write a
@@ -199,7 +202,12 @@ freqs xs = todo
 --     ==> fromList [("Bob",100),("Mike",50)]
 
 transfer :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
-transfer from to amount bank = todo
+transfer from to amount bank
+  = if Map.notMember from bank || Map.notMember to bank then bank
+    else case Map.lookup from bank of
+      Nothing -> bank
+      Just sum -> if amount < 0 || sum < amount then bank else Map.adjust (+amount) to (Map.adjust (+(-amount)) from bank)
+
 
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array and two indices, swap the elements in the indices.
@@ -209,7 +217,7 @@ transfer from to amount bank = todo
 --         ==> array (1,4) [(1,"one"),(2,"three"),(3,"two"),(4,"four")]
 
 swap :: Ix i => i -> i -> Array i a -> Array i a
-swap i j arr = todo
+swap i j arr = arr  // [(j,arr ! i),(i,arr ! j)]
 
 ------------------------------------------------------------------------------
 -- Ex 12: given an Array, find the index of the largest element. You
@@ -220,4 +228,5 @@ swap i j arr = todo
 -- Hint: check out Data.Array.indices or Data.Array.assocs
 
 maxIndex :: (Ix i, Ord a) => Array i a -> i
-maxIndex = todo
+maxIndex arr =let ass = assocs arr
+              in fst (foldr (\(i,e) (mi,me) -> if e < me then (mi,me) else (i,e)) (head ass) (assocs arr) )
