@@ -117,7 +117,14 @@ compose op1 op2 c = do
 --  4
 
 mkCounter :: IO (IO (), IO Int)
-mkCounter = todo
+mkCounter = do
+  a <- newIORef 0
+  let inc = do
+        ta <- readIORef a
+        modifyIORef a (+ 1)
+        return ()
+  let get = do readIORef a
+  return (inc, get)
 
 ------------------------------------------------------------------------------
 -- Ex 6: Reading lines from a file. The module System.IO defines
